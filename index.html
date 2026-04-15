@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aymen AI Lab</title>
+    <meta name="description" content="Personal sovereign AI research environment. Local LLMs, RAG systems, and agent workflows on dedicated infrastructure.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ================================================================
+           CSS Custom Properties
+           ================================================================ */
+        :root {
+            --accent: #10b981;
+            --accent-light: #34d399;
+            --accent-subtle: rgba(16, 185, 129, 0.08);
+            --accent-glow: rgba(16, 185, 129, 0.12);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 6px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Light Mode */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f1f5f9;
+            --bg-badge: #f1f5f9;
+            --bg-input: #f1f5f9;
+            --border: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #94a3b8;
+            --text-disabled: #cbd5e1;
+            --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-card-hover: 0 10px 25px rgba(0,0,0,0.06), 0 4px 10px rgba(0,0,0,0.04);
+            --shadow-logo: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        /* Dark Mode */
+        .dark {
+            --bg-primary: #0b0f1a;
+            --bg-secondary: #111827;
+            --bg-card: #151c2c;
+            --bg-card-hover: #1c2640;
+            --bg-badge: #1e293b;
+            --bg-input: #1e293b;
+            --border: #1e293b;
+            --border-hover: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-tertiary: #64748b;
+            --text-disabled: #334155;
+            --shadow-card: 0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.3);
+            --shadow-card-hover: 0 10px 30px rgba(0,0,0,0.3), 0 0 20px var(--accent-glow);
+            --shadow-logo: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        /* ================================================================
+           Base
+           ================================================================ */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background var(--transition), color var(--transition);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        /* ================================================================
+           Navbar
+           ================================================================ */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 24px;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            transition: background var(--transition), border-color var(--transition);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: -0.02em;
+        }
+
+        .navbar-brand .logo-mark {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent), #059669);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-weight: 800; font-size: 14px;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar-right a {
+            font-size: 13px; font-weight: 500;
+            color: var(--text-secondary);
+            padding: 6px 12px; border-radius: 8px;
+            transition: all var(--transition);
+        }
+
+        .navbar-right a:hover {
+            color: var(--text-primary);
+            background: var(--bg-badge);
+        }
+
+        .theme-toggle {
+            width: 36px; height: 36px;
+            border: 1px solid var(--border); border-radius: 10px;
+            background: var(--bg-card); color: var(--text-secondary);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all var(--transition);
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+
+        .theme-toggle svg { width: 18px; height: 18px; }
+        .dark .icon-sun { display: none; }
+        .icon-moon { display: none; }
+        .dark .icon-moon { display: block; }
+
+        /* ================================================================
+           Hero (compact)
+           ================================================================ */
+        .hero {
+            text-align: center;
+            padding: 48px 24px 32px;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 11px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--accent);
+            background: var(--accent-subtle);
+            padding: 4px 12px; border-radius: 20px;
+            margin-bottom: 16px;
+        }
+
+        .hero-badge .pulse {
+            width: 6px; height: 6px;
+            background: var(--accent); border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.4); }
+        }
+
+        .hero h1 {
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 800; letter-spacing: -0.035em;
+            line-height: 1.1; margin-bottom: 12px;
+        }
+
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, var(--accent), #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 15px; line-height: 1.6;
+            color: var(--text-secondary);
+            max-width: 520px; margin: 0 auto;
+        }
+
+        .hero .disclaimer {
+            font-size: 11px; color: var(--text-tertiary);
+            margin-top: 12px; font-style: italic;
+        }
+
+        /* ================================================================
+           Tabs
+           ================================================================ */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px 48px;
+            width: 100%;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 2px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 10px 18px;
+            font-size: 13px; font-weight: 500;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all var(--transition);
+            white-space: nowrap;
+            background: none; border-top: none; border-left: none; border-right: none;
+        }
+
+        .tab:hover { color: var(--text-secondary); }
+
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab .count {
+            font-size: 11px;
+            background: var(--bg-badge);
+            color: var(--text-tertiary);
+            padding: 1px 6px; border-radius: 10px;
+            margin-left: 6px;
+        }
+
+        .tab.active .count {
+            background: var(--accent-subtle);
+            color: var(--accent);
+        }
+
+        /* ================================================================
+           Search & Filters
+           ================================================================ */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+            max-width: 320px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            font-size: 13px; font-family: inherit;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            transition: all var(--transition);
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-subtle);
+        }
+
+        .search-box input::placeholder { color: var(--text-tertiary); }
+
+        .search-box .search-icon {
+            position: absolute; left: 10px; top: 50%;
+            transform: translateY(-50%);
+            width: 16px; height: 16px;
+            color: var(--text-tertiary);
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tag {
+            padding: 5px 12px;
+            font-size: 12px; font-weight: 500;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .filter-tag:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-card-hover);
+        }
+
+        .filter-tag.active {
+            border-color: var(--accent);
+            background: var(--accent-subtle);
+            color: var(--accent);
+        }
+
+        /* ================================================================
+           Card Grid
+           ================================================================ */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        /* ================================================================
+           Card — Model/Service Hub Style
+           ================================================================ */
+        .card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
+            transition: all var(--transition);
+            overflow: hidden;
+        }
+
+        .card:not(.disabled):hover {
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-card-hover);
+            transform: translateY(-2px);
+            background: var(--bg-card-hover);
+        }
+
+        .card.disabled { opacity: 0.45; cursor: default; }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .card-logo {
+            width: 44px; height: 44px;
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+            box-shadow: var(--shadow-logo);
+            background: var(--bg-secondary);
+            flex-shrink: 0;
+        }
+
+        .card-logo svg,
+        .card-logo img {
+            width: 44px; height: 44px;
+            display: block; border-radius: var(--radius-sm);
+            object-fit: cover;
+        }
+
+        .card-header-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-title {
+            font-size: 15px; font-weight: 600;
+            letter-spacing: -0.01em;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-provider {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-provider .origin {
+            font-size: 11px;
+        }
+
+        .card-desc {
+            font-size: 13px; line-height: 1.5;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            flex: 1;
+        }
+
+        /* Card Meta Row */
+        .card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .meta-pill {
+            display: inline-flex; align-items: center;
+            font-size: 11px; font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 2px 8px; border-radius: var(--radius-xs);
+            background: var(--bg-badge);
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .meta-pill.size { color: #8b5cf6; }
+        .meta-pill.ctx { color: #3b82f6; }
+        .meta-pill.license { color: #f59e0b; }
+
+        /* Card Tags */
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .tag {
+            font-size: 11px; font-weight: 500;
+            padding: 2px 8px; border-radius: 4px;
+            background: var(--bg-badge);
+            color: var(--text-tertiary);
+            transition: all var(--transition);
+        }
+
+        /* Status & Type Badges */
+        .badge {
+            display: inline-flex; align-items: center;
+            gap: 4px; font-size: 11px; font-weight: 600;
+            padding: 2px 8px; border-radius: var(--radius-xs);
+            white-space: nowrap;
+        }
+
+        .badge .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%; flex-shrink: 0;
+        }
+
+        .badge-local { background: rgba(16,185,129,0.1); color: #10b981; }
+        .badge-local .dot { background: #10b981; }
+
+        .badge-cloud { background: rgba(139,92,246,0.1); color: #8b5cf6; }
+        .badge-cloud .dot { background: #8b5cf6; }
+
+        .badge-active { background: rgba(16,185,129,0.1); color: #10b981; }
+        .badge-active .dot { background: #10b981; }
+
+        .badge-internal { background: rgba(59,130,246,0.1); color: #3b82f6; }
+        .badge-internal .dot { background: #3b82f6; }
+
+        .badge-planned { background: var(--bg-badge); color: var(--text-tertiary); }
+        .badge-planned .dot { background: var(--text-tertiary); }
+
+        .badge-new {
+            background: rgba(16,185,129,0.1);
+            color: var(--accent);
+            font-size: 10px;
+            padding: 1px 6px;
+        }
+
+        /* Card Footer Link */
+        .card-link {
+            display: block;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-tertiary);
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            transition: color var(--transition);
+        }
+
+        .card:not(.disabled):hover .card-link { color: var(--accent); }
+
+        /* Learn More link in card */
+        .card-action {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 12px; font-weight: 500;
+            color: var(--accent);
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            transition: all var(--transition);
+        }
+
+        .card-action svg { width: 14px; height: 14px; }
+
+        .card:not(.disabled):hover .card-action { gap: 8px; }
+
+        /* ================================================================
+           Stats Bar
+           ================================================================ */
+        .stats-bar {
+            display: flex;
+            gap: 24px;
+            padding: 16px 0;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            line-height: 1.3;
+        }
+
+        .stat-divider {
+            width: 1px;
+            height: 32px;
+            background: var(--border);
+        }
+
+        /* ================================================================
+           No Results
+           ================================================================ */
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+
+        /* ================================================================
+           Footer
+           ================================================================ */
+        .footer {
+            margin-top: auto;
+            border-top: 1px solid var(--border);
+            padding: 24px;
+        }
+
+        .footer-inner {
+            max-width: 960px; margin: 0 auto;
+            display: flex; flex-wrap: wrap;
+            align-items: center; justify-content: space-between;
+            gap: 12px; font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .footer a { color: var(--text-tertiary); transition: color var(--transition); }
+        .footer a:hover { color: var(--accent); }
+
+        .footer-links { display: flex; gap: 16px; }
+
+        .footer-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+
+        /* ================================================================
+           Responsive
+           ================================================================ */
+        @media (max-width: 1024px) {
+            .card-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 640px) {
+            .card-grid { grid-template-columns: 1fr; }
+            .hero { padding: 32px 16px 24px; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .search-box { max-width: 100%; }
+            .navbar-right a { display: none; }
+            .footer-inner { flex-direction: column; text-align: center; }
+            .stats-bar { gap: 16px; }
+            .stat-divider { display: none; }
+        }
+
+        /* ================================================================
+           API Panel
+           ================================================================ */
+        .api-panel {
+            display: none;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .api-service {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+        }
+
+        .api-service-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 22px 24px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .api-service-logo {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+            box-shadow: var(--shadow-logo);
+        }
+
+        .api-service-logo img {
+            width: 32px; height: 32px;
+            object-fit: contain;
+        }
+
+        .api-service-logo .logo-text {
+            font-size: 13px; font-weight: 800;
+            color: var(--accent);
+            letter-spacing: -0.03em;
+        }
+
+        .api-service-info { flex: 1; }
+
+        .api-service-title {
+            font-size: 16px; font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .api-service-desc {
+            font-size: 13px; color: var(--text-secondary);
+            line-height: 1.5;
+            max-width: 640px;
+        }
+
+        .api-fields {
+            padding: 18px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .api-field label {
+            display: block;
+            font-size: 11px; font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 5px;
+        }
+
+        .api-field-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+        }
+
+        .api-field-val {
+            flex: 1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            color: var(--text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .api-btn {
+            padding: 4px 10px;
+            font-size: 11.5px; font-weight: 500; font-family: inherit;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .api-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-subtle);
+        }
+
+        .api-btn.done {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-subtle);
+        }
+
+        .api-note {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            font-style: italic;
+            padding: 0 24px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Snippets */
+        .api-snippets { padding: 20px 24px 24px; }
+
+        .snippets-label {
+            font-size: 13px; font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 14px;
+        }
+
+        .snippet-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .snippet-tabs {
+            display: flex;
+            gap: 2px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 3px;
+        }
+
+        .stab {
+            padding: 4px 12px;
+            font-size: 12px; font-weight: 500; font-family: inherit;
+            border: none; border-radius: 6px;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .stab.active {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+        }
+
+        .snippet-actions { display: flex; gap: 6px; margin-left: auto; }
+
+        .snippet-block {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: auto;
+        }
+
+        .snippet-block pre {
+            margin: 0;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.65;
+            color: var(--text-primary);
+            white-space: pre;
+        }
+
+        .sc { color: var(--text-tertiary); }
+        .sk { color: #06b6d4; }
+        .ss { color: #10b981; }
+        .sv { color: #a78bfa; }
+
+        @media (max-width: 640px) {
+            .api-service-header { flex-direction: column; gap: 12px; }
+            .api-fields, .api-snippets { padding: 14px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <div class="logo-mark">AI</div>
+            <span>Aymen AI Lab</span>
+        </div>
+        <div class="navbar-right">
+            <a href="https://aymenmastouri.io">Portfolio</a>
+            <a href="https://github.com/aymenmastouri">GitHub</a>
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+                <svg class="icon-sun" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/>
+                </svg>
+                <svg class="icon-moon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="hero">
+        <div class="hero-badge">
+            <span class="pulse"></span>
+            Self-Hosted &middot; Hybrid &middot; Open Source
+        </div>
+        <h1>Personal <span class="gradient">AI Research</span> Environment</h1>
+        <p>
+            Hybrid AI stack: sovereign local models on dedicated infrastructure
+            in Germany, plus cloud models via HuggingFace. Unified through a single API.
+        </p>
+        <p class="disclaimer">
+            A personal research project by Aymen Mastouri. Not affiliated with any employer or client.
+        </p>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+
+        <!-- Stats -->
+        <div class="stats-bar">
+            <div class="stat">
+                <span class="stat-value">7</span>
+                <span class="stat-label">Models<br>Available</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat">
+                <span class="stat-value">7</span>
+                <span class="stat-label">Services<br>Running</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat">
+                <span class="stat-value">3</span>
+                <span class="stat-label">Planned<br>Services</span>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="all">All<span class="count">17</span></button>
+            <button class="tab" data-tab="models">Models<span class="count">7</span></button>
+            <button class="tab" data-tab="services">Services<span class="count">7</span></button>
+            <button class="tab" data-tab="roadmap">Roadmap<span class="count">3</span></button>
+            <button class="tab" data-tab="api">API</button>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="search-box">
+                <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+                </svg>
+                <input type="text" id="search" placeholder="Search models and services..." autocomplete="off">
+            </div>
+            <div class="filter-tags">
+                <button class="filter-tag" data-filter="chat">Chat</button>
+                <button class="filter-tag" data-filter="reasoning">Reasoning</button>
+                <button class="filter-tag" data-filter="embedding">Embedding</button>
+                <button class="filter-tag" data-filter="rag">RAG</button>
+                <button class="filter-tag" data-filter="sso">SSO</button>
+                <button class="filter-tag" data-filter="api">API</button>
+            </div>
+        </div>
+
+        <!-- Card Grid -->
+        <div class="card-grid" id="cardGrid">
+
+            <!-- ==================== MODELS ==================== -->
+
+            <!-- Qwen 3.5 9B — Fast -->
+            <a href="https://huggingface.co/Qwen/Qwen3.5-9B" target="_blank" rel="noopener" class="card" data-category="models" data-tags="chat" data-search="qwen 3.5 9b fast huggingface together cloud chat german">
+                <div class="card-header">
+                    <div class="card-logo">
+                        <img src="logos/qwen.svg" alt="Qwen">
+                    </div>
+                    <div class="card-header-text">
+                        <div class="card-title">
+                            Qwen 3.5 9B
+                            <span class="badge badge-new">New</span>
+                        </div>
+                        <div class="card-provider">
+                            Alibaba <span class="origin">CN</span>
+                            &middot; via HuggingFace &rarr; Together AI
+                        </div>
+                    </div>
+                    <span class="badge badge-cloud"><span class="dot"></span>Cloud</span>
+                </div>
+                <p class="card-desc">Fast mode with thinking disabled. Direct, efficient responses for everyday chat. Excellent German, English, and French support.</p>
+                <div class="card-meta">
+                    <span class="meta-pill size">9B params</span>
+                    <span class="meta-pill ctx">CTX 262K</span>
+                    <span class="meta-pill license">Apache 2.0</span>
+                </div>
+                <div class="card-tags">
+                    <span class="tag">chat</span>
+                </div>
+            </a>
+
+            <!-- Qwen 3.5 9B — Think -->
+            <a href="https://huggingface.co/Qwen/Qwen3.5-9B" target="_blank" rel="noopener" class="card" data-category="models" data-tags="chat,reasoning" data-search="qwen 3.5 9b think reasoning chain-of-thought huggingface together cloud complex">
+                <div class="card-header">
+                    <div class="card-logo">
+                        <img src="logos/qwen.svg" alt="Qwen">
+                    </div>
+                    <div class="card-header-text">
+                        <div class="card-title">
+                            Qwen 3.5 9B Think
+                            <span class="badge badge-new">New</span>
+                        </div>
+                        <div class="card-provider">
+                            Alibaba <span class="origin">CN</span>
+                            &middot; via HuggingFace &rarr; Together AI
+                        </div>
+                    </div>
+                    <span class="badge badge-cloud"><span class="dot"></span>Cloud</span>
+                </div>
+                <p class="card-desc">Thinking mode with chain-of-thought reasoning enabled. For complex tasks: code generation, math, analysis, and multi-step problem solving.</p>
+                <div class="card-meta">
+                    <span class="meta-pill size">9B params</span>
+                    <span class="meta-pill ctx">CTX 262K</span>
+                    <span class="meta-pill license">Apache 2.0</span>
+                </div>
+                <div class="card-tags">
+                    <span class="tag">chat</span>
+                    <span class="tag">reasoning</span>
+                </div>
+            </a>
+
+            <!-- GPT-OSS-120B -->
+            <a href="https://huggingface.co/openai/gpt-oss-120b" target="_blank" rel="noopener" class="card" data-category="models" data-tags="chat,reasoning" data-search="gpt oss 120b openai reasoning architecture software cloud general allrounder">
+                <div class="card-header">
+                    <div class="card-logo">
+                        <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="200" height="200" rx="40" fill="#171717"/>
+                            <circle cx="100" cy="100" r="45" fill="none" stroke="white" stroke-width="8"/>
+                            <circle cx="100" cy="100" r="18" fill="white"/>
+                        </svg>
+                    </div>
+                    <div class="card-header-text">
+                        <div class="card-title">
+                            GPT-OSS-120B
+                            <span class="badge badge-new">New</span>
+                        </div>
+                        <div class="card-provider">
+                            OpenAI <span class="origin">US</span>
+                            &middot; via HuggingFace &rarr; Novita AI
+                        </div>
+                    </div>
+                    <span class="badge badge-cloud"><span class="dot"></span>Cloud</span>
+                </div>
+                <p class="card-desc">OpenAI's first open-source MoE model. 120B total, 5.1B active. Configurable reasoning depth. Excels at software architecture, complex reasoning, and multilingual tasks.</p>
+                <div class="card-meta">
+                    <span class="meta-pill size">120B MoE &middot; 5.1B active</span>
+                    <span class="meta-pill ctx">CTX 131K</span>
+                    <span class="meta-pill license">Apache 2.0</span>
+                </div>
+                <div class="card-tags">
+                    <span class="tag">chat</span>
+                    <span class="tag">reasoning</span>
+                </div>
+            </a>
+
+            <!-- Qwen 2.5 3B -->
+            <div class="card" data-category="models" data-tags="chat" data-search="qwen 2.5 3b local ollama chat german sovereign">
+                <div class="card-header">
+                    <div class="card-logo">
+                        <img src="logos/qwen.svg" alt="Qwen">
+                    </div>
+                    <div class="card-header-text">
+                        <div class="card-title">Qwen 2.5 3B</div>
+                        <div class="card-provider">
+                            Alibaba <span class="origin">CN</span>
+                            &middot; Local via Ollama
+                        </div>
+                    </div>
+                    <span class="badge badge-local"><span class="dot"></span>Local</span>
+                </div>
+                <p class="card-desc">Primary local chat model. Excellent multilingual support (DE/EN/FR). Sovereign inference on the VPS with zero external calls.</p>
+                <div class="card-meta">
+                    <span class="meta-pill size">3B &middot; 1.9 GB</span>
+                    <span class="meta-pill ctx">CTX 32K</span>
+                    <span class="meta-pill license">Apache 2.0</span>
+                </div>
+                <div class="card-tags">
+                    <span class="tag">chat</span>
+                </div>
+            </div>
+
+            <!-- Llama 3.2 3B -->
+            <div class="card" data-category="models" data-tags="chat" data-search="llama 3.2 3b local ollama chat english meta fallback">
+                <div class="card-header">
+                    <div class="card-logo">
+                        <img src="logos/llama.svg" alt="Llama">
+                    </div>
+                    <div class="card-header-text">
+                        <div class="card-title">Llama 3.2 3B</div>
+                        <div class="card-provider">
+                            Meta <span class="origin">US</span>
+                            &middot; Local via Ollama
+                        </div>
+                    </div>
+                    <span class="badge badge-local"><span class="dot"></span>Local</span>
+                </div>
+                <p class="card-desc">Fallback chat model. English-focused with solid general capabilities. Runs fully on-premise with no data leaving the server.</p>
+                <div class="card-meta">
+                    <span class="meta-pill size">3B &middot; 2.0 GB</span>
+                    <span class="meta-pill ctx">CTX 128K</span>
+                    <span class="meta-pill license">Llama 3.2</span>
+                </div>
+                <div class="card-tags">
+                    <span class="tag">chat</span>
+                </div>
+            </div>
+
+            <!-- Qwen3-Coder-Next -->
+            <a href="https://huggingface.co/Qwen/Qwen3-Coder-Next" target="_blank" rel="noopener" class="card" data-category="models" data-tags="chat,reasoning" data-search="qwen3 coder next code programming huggingface novita cloud tool calling agent">
+                <div class="card-header">
+                    <div class="card-logo">
+                        <img src="logos/qwen.svg" alt="Qwen">
+                    </div>
+                    <div class="card-header-text">
+                        <div class="card-title">
+                            Qwen3-Coder-Next
+                            <span class="badge badge-new">New</span>
+                        </div>
+                        <div class="card-provider">
+                            Alibaba <span class="origin">CN</span>
+                            &middot; via HuggingFace &rarr; Novita AI
+                        </div>
+                    </div>
+                    <span class="badge badge-cloud"><span class="dot"></span>Cloud</span>
+                </div>
+                <p class="card-desc">Specialized coding model. 80B MoE with only 3B active params. Excels at code generation, tool calling, and agentic workflows. SWE-Bench 70.6%.</p>
+                <div class="card-meta">
+                    <span class="meta-pill size">80B MoE &middot; 3B active</span>
+                    <span class="meta-pill ctx">CTX 262K</span>
+                    <span class="meta-pill license">Apache 2.0</span>
+                </div>
+                <div class="card-tags">
+                    <span class="tag">chat</span>
+                    <span class="tag">reasoning</span>
+                </div>
+            </a>
+
+            <!-- nomic-embed-text -->
+            <div class="card" data-category="models" data-tags="embedding,rag" data-search="nomic embed text embedding vector local ollama rag semantic search">
+                <div class="card-header">
+                    <div class="card-logo">
+                        <img src="logos/nomic.svg" alt="Nomic">
+                    </div>
+                    <div class="card-header-text">
+                        <div class="card-title">nomic-embed-text</div>
+                        <div class="card-provider">
+                            Nomic AI <span class="origin">US</span>
+                            &middot; Local via Ollama
+                        </div>
+                    </div>
+                    <span class="badge badge-local"><span class="dot"></span>Local</span>
+                </div>
+                <p class="card-desc">Embedding model for RAG pipelines. Generates 768-dim vectors for semantic search. Powers document retrieval in RAG pipeline.</p>
+                <div class="card-meta">
+                    <span class="meta-pill size">137M &middot; 274 MB</span>
+                    <span class="meta-pill ctx">768-dim</span>
+                    <span class="meta-pill license">Apache 2.0</span>
+                </div>
+                <div class="card-tags">
+                    <span class="tag">embedding</span>
+                    <span class="tag">rag</span>
+                </div>
+            </div>
+
+            <!-- ==================== SERVICES ==================== -->
+
+            <!-- Authentik -->
+            <a href="https://auth.aymenmastouri.io" target="_blank" rel="noopener" class="card" data-category="services" data-tags="sso" data-search="authentik sso identity access management oidc oauth authentication">
+                <div class="card-header">
+                    <div class="card-logo">
+                        <img src="logos/authentik.svg" alt="Authentik">
+                    </div>
+                    <div class="card-header-text">
+                        <div class="card-title">Authentik</div>
+                        <div class="card-provider">Identity Provider &middot; OIDC / SAML</div>
+                    </div>
+                    <span class="badge badge-active"><span class="dot"></span>Active</span>
+                </div>
+                <p class="card-desc">Central SSO for all lab services. OIDC login for Open WebUI, Forward Auth for dashboards. User management and access control.</p>
+                <span class="card-action">
+                    auth.aymenmastouri.io
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
+                </span>
+            </a>
+
+            <!-- Open WebUI -->
+            <a href="https://chat.aymenmastouri.io" target="_blank" rel="noopener" class="card" data-category="services" data-tags="chat,rag" data-search="open webui chat interface conversation rag document qa">
+                <div class="card-header">
+                    <div class="card-logo">
+                        <img src="logos/openwebui.png" alt="Open WebUI">
+                    </div>
+                    <div class="card-header-text">
+                        <div class="card-title">Open WebUI</div>
+                        <div class="card-provider">Chat Interface &middot; v0.5.4</div>
+                    </div>
+                    <span class="badge badge-active"><span class="dot"></span>Active</span>
+                </div>
+                <p class="card-desc">Chat interface with access to all models &mdash; local and cloud. Select per conversation. RAG-enabled with Qdrant vector search.</p>
+                <span class="card-action">
+                    chat.aymenmastouri.io
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
+                </span>
+            </a>
+
+            <!-- LiteLLM -->
+            <a href="https://llm.aymenmastouri.io" target="_blank" rel="noopener" class="card" data-category="services" data-tags="api" data-search="litellm api proxy openai compatible unified endpoint models">
+                <div class="card-header">
+                    <div class="card-logo">
+                        <img src="logos/litellm.svg" alt="LiteLLM">
+                    </div>
+                    <div class="card-header-text">
+                        <div class="card-title">LiteLLM</div>
+                        <div class="card-provider">API Gateway &middot; OpenAI-compatible</div>
+                    </div>
+                    <span class="badge badge-active"><span class="dot"></span>Active</span>
+                </div>
+                <p class="card-desc">Unified API proxy. Routes to local Ollama models and external HuggingFace providers through a single OpenAI-compatible endpoint.</p>
+                <span class="card-action">
+                    llm.aymenmastouri.io
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
+                </span>
+            </a>
+
+            <!-- Qdrant -->
+            <a href="https://qdrant.aymenmastouri.io/dashboard" target="_blank" rel="noopener" class="card" data-category="services" data-tags="rag,embedding" data-search="qdrant vector database semantic search embeddings storage">
+                <div class="card-header">
+                    <div class="card-logo">
+                        <img src="logos/qdrant.png" alt="Qdrant">
+                    </div>
+                    <div class="card-header-text">
+                        <div class="card-title">Qdrant</div>
+                        <div class="card-provider">Vector Database &middot; v1.12</div>
+                    </div>
+                    <span class="badge badge-active"><span class="dot"></span>Active</span>
+                </div>
+                <p class="card-desc">Vector database for semantic search. Stores 768-dim embeddings from nomic-embed-text. Powers document retrieval in RAG pipeline.</p>
+                <span class="card-action">
+                    qdrant.aymenmastouri.io
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
+                </span>
+            </a>
+
+            <!-- Ollama -->
+            <div class="card" data-category="services" data-tags="api" data-search="ollama local llm runtime inference engine sovereign">
+                <div class="card-header">
+                    <div class="card-logo">
+                        <img src="logos/ollama.png" alt="Ollama">
+                    </div>
+                    <div class="card-header-text">
+                        <div class="card-title">Ollama</div>
+                        <div class="card-provider">LLM Runtime &middot; v0.5.4</div>
+                    </div>
+                    <span class="badge badge-internal"><span class="dot"></span>Internal</span>
+                </div>
+                <p class="card-desc">Local LLM runtime. Sovereign inference engine running all local models. 6 GB RAM allocated, auto-unloads after 5 min idle.</p>
+                <span class="card-link">internal &middot; :11434</span>
+            </div>
+
+            <!-- SDLC Pilot -->
+            <a href="https://sdlc.aymenmastouri.io" target="_blank" rel="noopener" class="card" data-category="services" data-tags="api,reasoning" data-search="sdlc pilot software development lifecycle architecture analysis documentation code generation pipeline">
+                <div class="card-header">
+                    <div class="card-logo">
+                        <img src="logos/sdlc-pilot.svg" alt="SDLC Pilot">
+                    </div>
+                    <div class="card-header-text">
+                        <div class="card-title">
+                            SDLC Pilot
+                            <span class="badge badge-new">New</span>
+                        </div>
+                        <div class="card-provider">AI-Powered SDLC &middot; v0.8.0</div>
+                    </div>
+                    <span class="badge badge-active"><span class="dot"></span>Active</span>
+                </div>
+                <p class="card-desc">End-to-end software lifecycle automation. Indexes codebases, extracts architecture facts, generates C4/Arc42 docs. Evidence-first, zero hallucination.</p>
+                <span class="card-action">
+                    sdlc.aymenmastouri.io
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
+                </span>
+            </a>
+
+            <!-- Langfuse -->
+            <a href="https://langfuse.aymenmastouri.io" target="_blank" rel="noopener" class="card" data-category="services" data-tags="api" data-search="langfuse llm observability tracing cost tracking prompt monitoring">
+                <div class="card-header">
+                    <div class="card-logo">
+                        <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="200" height="200" rx="40" fill="#0f172a"/>
+                            <circle cx="70" cy="70" r="18" fill="#f97316" opacity="0.9"/>
+                            <circle cx="130" cy="70" r="18" fill="#f97316" opacity="0.6"/>
+                            <circle cx="100" cy="130" r="18" fill="#f97316" opacity="0.3"/>
+                            <line x1="82" y1="80" x2="93" y2="118" stroke="#f97316" stroke-width="4" opacity="0.5"/>
+                            <line x1="118" y1="80" x2="107" y2="118" stroke="#f97316" stroke-width="4" opacity="0.5"/>
+                            <line x1="85" y1="70" x2="115" y2="70" stroke="#f97316" stroke-width="4" opacity="0.4"/>
+                        </svg>
+                    </div>
+                    <div class="card-header-text">
+                        <div class="card-title">
+                            Langfuse
+                            <span class="badge badge-new">New</span>
+                        </div>
+                        <div class="card-provider">LLM Observability &middot; v2</div>
+                    </div>
+                    <span class="badge badge-active"><span class="dot"></span>Active</span>
+                </div>
+                <p class="card-desc">LLM tracing and cost monitoring. Track every prompt, measure quality, debug pipelines. Connected to SDLC Pilot.</p>
+                <span class="card-action">
+                    langfuse.aymenmastouri.io
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
+                </span>
+            </a>
+
+            <!-- ==================== ROADMAP ==================== -->
+
+            <!-- n8n -->
+            <div class="card disabled" data-category="roadmap" data-tags="" data-search="n8n workflow automation agent pipeline">
+                <div class="card-header">
+                    <div class="card-logo">
+                        <img src="logos/n8n.png" alt="n8n">
+                    </div>
+                    <div class="card-header-text">
+                        <div class="card-title">n8n</div>
+                        <div class="card-provider">Workflow Automation</div>
+                    </div>
+                    <span class="badge badge-planned"><span class="dot"></span>Planned</span>
+                </div>
+                <p class="card-desc">Workflow automation for AI agent pipelines. Connect models, APIs, and data sources with visual flows.</p>
+            </div>
+
+            <!-- Docling -->
+            <div class="card disabled" data-category="roadmap" data-tags="" data-search="docling document parsing extraction rag ingestion pdf">
+                <div class="card-header">
+                    <div class="card-logo">
+                        <img src="logos/docling.svg" alt="Docling">
+                    </div>
+                    <div class="card-header-text">
+                        <div class="card-title">Docling</div>
+                        <div class="card-provider">Document Processing</div>
+                    </div>
+                    <span class="badge badge-planned"><span class="dot"></span>Planned</span>
+                </div>
+                <p class="card-desc">Document parsing and extraction for RAG ingestion. Convert PDFs, Word docs, and web pages into structured chunks.</p>
+            </div>
+
+            <!-- Langflow -->
+            <div class="card disabled" data-category="roadmap" data-tags="" data-search="langflow low-code agent builder visual chain">
+                <div class="card-header">
+                    <div class="card-logo">
+                        <img src="logos/langflow.svg" alt="Langflow">
+                    </div>
+                    <div class="card-header-text">
+                        <div class="card-title">Langflow</div>
+                        <div class="card-provider">Agent Builder</div>
+                    </div>
+                    <span class="badge badge-planned"><span class="dot"></span>Planned</span>
+                </div>
+                <p class="card-desc">Visual low-code builder for AI agents and chains. Drag-and-drop interface for building complex AI workflows.</p>
+            </div>
+
+        </div>
+
+        <!-- ============================================================
+             API Panel
+             ============================================================ -->
+        <div id="apiPanel" class="api-panel">
+
+            <!-- LLM Endpoints -->
+            <div class="api-service">
+                <div class="api-service-header">
+                    <div class="api-service-logo">
+                        <img src="logos/litellm.svg" alt="LiteLLM">
+                    </div>
+                    <div class="api-service-info">
+                        <div class="api-service-title">LLM Endpoints</div>
+                        <div class="api-service-desc">OpenAI-compatible API endpoints for accessing Chat, Code, Reasoning, and Embedding models via LiteLLM proxy.</div>
+                    </div>
+                </div>
+                <div class="api-fields">
+                    <div class="api-field">
+                        <label>API Base (external):</label>
+                        <div class="api-field-row">
+                            <span class="api-field-val">https://llm.aymenmastouri.io/v1</span>
+                            <button class="api-btn" onclick="copyVal(this,'https://llm.aymenmastouri.io/v1')">Copy</button>
+                        </div>
+                    </div>
+                    <div class="api-field">
+                        <label>API Base (internal):</label>
+                        <div class="api-field-row">
+                            <span class="api-field-val">http://litellm:4000/v1</span>
+                            <button class="api-btn" onclick="copyVal(this,'http://litellm:4000/v1')">Copy</button>
+                        </div>
+                    </div>
+                    <div class="api-field">
+                        <label>API Key:</label>
+                        <div class="api-field-row">
+                            <span class="api-field-val" id="llm-key-display" data-secret="sk-28c26a444662d1c6e06450a7bf16985edb519550f45d2b54">••••••••••••••••</span>
+                            <button class="api-btn" onclick="toggleSecret('llm-key-display','llm-key-toggle')" id="llm-key-toggle">Show</button>
+                            <button class="api-btn" onclick="copySecret('llm-key-display',this)">Copy</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="api-snippets">
+                    <div class="snippets-label">Code Snippets</div>
+                    <div class="snippet-bar">
+                        <div class="snippet-tabs">
+                            <button class="stab active" onclick="showSnippet(this,'llm-chat')">Chat</button>
+                            <button class="stab" onclick="showSnippet(this,'llm-code')">Code</button>
+                            <button class="stab" onclick="showSnippet(this,'llm-think')">Thinking</button>
+                            <button class="stab" onclick="showSnippet(this,'llm-reason')">Reasoning</button>
+                            <button class="stab" onclick="showSnippet(this,'llm-embed')">Embeddings</button>
+                            <button class="stab" onclick="showSnippet(this,'llm-hf')">HuggingFace Direct</button>
+                            <button class="stab" onclick="showSnippet(this,'llm-ollama')">Ollama Direct</button>
+                        </div>
+                        <div class="snippet-tabs">
+                            <button class="stab active">Python</button>
+                        </div>
+                        <div class="snippet-actions">
+                            <button class="api-btn" onclick="downloadActiveSnippet('llm')">&#8595; .py</button>
+                            <button class="api-btn" onclick="copyActiveSnippet('llm',this)">Copy</button>
+                        </div>
+                    </div>
+                    <div class="snippet-block">
+                        <pre class="llm-snippet active" id="llm-chat"><span class="sc"># Chat via LiteLLM Proxy</span>
+<span class="sc"># Route: Client → LiteLLM → HuggingFace Router → Together AI</span>
+<span class="sc"># Model: Qwen 3.5 9B (fast mode, thinking disabled)</span>
+<span class="sc"># pip install openai</span>
+<span class="sk">from</span> openai <span class="sk">import</span> OpenAI
+
+client = OpenAI(
+    base_url=<span class="ss">"https://llm.aymenmastouri.io/v1"</span>,
+    api_key=<span class="ss">"&lt;your-litellm-api-key&gt;"</span>
+)
+
+response = client.chat.completions.create(
+    model=<span class="ss">"qwen3.5-9b"</span>,          <span class="sc"># Cloud — HuggingFace → Together AI</span>
+    messages=[
+        {<span class="ss">"role"</span>: <span class="ss">"user"</span>, <span class="ss">"content"</span>: <span class="ss">"Erkl&auml;re Docker Compose in 3 S&auml;tzen."</span>}
+    ]
+)
+
+<span class="sk">print</span>(response.choices[<span class="sv">0</span>].message.content)</pre>
+                        <pre class="llm-snippet" id="llm-code" style="display:none"><span class="sc"># Code Generation via LiteLLM Proxy</span>
+<span class="sc"># Route: Client → LiteLLM → HuggingFace Router → Novita AI</span>
+<span class="sc"># Model: Qwen3-Coder-Next (80B MoE, 3B active, code-specialized)</span>
+<span class="sc"># Cost: ~$0.20/1M input, $1.50/1M output</span>
+<span class="sc"># pip install openai</span>
+<span class="sk">from</span> openai <span class="sk">import</span> OpenAI
+
+client = OpenAI(
+    base_url=<span class="ss">"https://llm.aymenmastouri.io/v1"</span>,
+    api_key=<span class="ss">"&lt;your-litellm-api-key&gt;"</span>
+)
+
+response = client.chat.completions.create(
+    model=<span class="ss">"qwen3-coder"</span>,          <span class="sc"># Cloud — HuggingFace → Novita AI</span>
+    messages=[
+        {<span class="ss">"role"</span>: <span class="ss">"system"</span>, <span class="ss">"content"</span>: <span class="ss">"You are an expert Python developer."</span>},
+        {<span class="ss">"role"</span>: <span class="ss">"user"</span>, <span class="ss">"content"</span>: <span class="ss">"Write a FastAPI health endpoint with DB and Redis checks."</span>}
+    ],
+    max_tokens=<span class="sv">8192</span>
+)
+
+<span class="sk">print</span>(response.choices[<span class="sv">0</span>].message.content)</pre>
+                        <pre class="llm-snippet" id="llm-think" style="display:none"><span class="sc"># Thinking Mode via LiteLLM Proxy</span>
+<span class="sc"># Route: Client → LiteLLM → HuggingFace Router → Together AI</span>
+<span class="sc"># Model: Qwen 3.5 9B (chain-of-thought enabled, 32K context)</span>
+<span class="sc"># The model reasons step-by-step before answering.</span>
+<span class="sc"># pip install openai</span>
+<span class="sk">from</span> openai <span class="sk">import</span> OpenAI
+
+client = OpenAI(
+    base_url=<span class="ss">"https://llm.aymenmastouri.io/v1"</span>,
+    api_key=<span class="ss">"&lt;your-litellm-api-key&gt;"</span>
+)
+
+response = client.chat.completions.create(
+    model=<span class="ss">"qwen3.5-9b-think"</span>,    <span class="sc"># Cloud — HuggingFace → Together AI</span>
+    messages=[
+        {<span class="ss">"role"</span>: <span class="ss">"user"</span>, <span class="ss">"content"</span>: <span class="ss">"Compare microservices vs monolith for a 5-person startup."</span>}
+    ],
+    max_tokens=<span class="sv">32768</span>
+)
+
+<span class="sk">print</span>(response.choices[<span class="sv">0</span>].message.content)</pre>
+                        <pre class="llm-snippet" id="llm-reason" style="display:none"><span class="sc"># Reasoning via LiteLLM Proxy</span>
+<span class="sc"># Route: Client → LiteLLM → HuggingFace Router → Novita AI</span>
+<span class="sc"># Model: GPT-OSS-120B (OpenAI open-source MoE, 120B total, 5.1B active)</span>
+<span class="sc"># Cost: ~$0.10/1M tokens</span>
+<span class="sc"># pip install openai</span>
+<span class="sk">from</span> openai <span class="sk">import</span> OpenAI
+
+client = OpenAI(
+    base_url=<span class="ss">"https://llm.aymenmastouri.io/v1"</span>,
+    api_key=<span class="ss">"&lt;your-litellm-api-key&gt;"</span>
+)
+
+response = client.chat.completions.create(
+    model=<span class="ss">"gpt-oss-120b"</span>,         <span class="sc"># Cloud — HuggingFace → Novita AI</span>
+    messages=[
+        {<span class="ss">"role"</span>: <span class="ss">"user"</span>, <span class="ss">"content"</span>: <span class="ss">"Analyze the trade-offs of event sourcing vs CRUD for an e-commerce system."</span>}
+    ],
+    max_tokens=<span class="sv">8192</span>
+)
+
+<span class="sk">print</span>(response.choices[<span class="sv">0</span>].message.content)</pre>
+                        <pre class="llm-snippet" id="llm-embed" style="display:none"><span class="sc"># Embeddings via LiteLLM Proxy</span>
+<span class="sc"># Route: Client → LiteLLM → Ollama (local)</span>
+<span class="sc"># Model: nomic-embed-text (137M params, 768 dimensions)</span>
+<span class="sc"># Runs locally on VPS — free, no cloud dependency.</span>
+<span class="sc"># pip install openai</span>
+<span class="sk">from</span> openai <span class="sk">import</span> OpenAI
+
+client = OpenAI(
+    base_url=<span class="ss">"https://llm.aymenmastouri.io/v1"</span>,
+    api_key=<span class="ss">"&lt;your-litellm-api-key&gt;"</span>
+)
+
+response = client.embeddings.create(
+    model=<span class="ss">"nomic-embed-text"</span>,    <span class="sc"># Local — Ollama</span>
+    input=[<span class="ss">"What is a vector database?"</span>],
+    encoding_format=<span class="ss">"float"</span>
+)
+
+embedding = response.data[<span class="sv">0</span>].embedding
+<span class="sk">print</span>(<span class="ss">f"Dimensions: </span>{len(embedding)}<span class="ss">"</span>)  <span class="sc"># → 768</span></pre>
+                        <pre class="llm-snippet" id="llm-hf" style="display:none"><span class="sc"># Direct via HuggingFace Inference API (bypass LiteLLM)</span>
+<span class="sc"># Route: Client → HuggingFace Router → Together AI / Novita</span>
+<span class="sc"># Requires a HuggingFace API token (free tier available).</span>
+<span class="sc"># pip install openai</span>
+<span class="sk">from</span> openai <span class="sk">import</span> OpenAI
+
+client = OpenAI(
+    base_url=<span class="ss">"https://router.huggingface.co/v1"</span>,
+    api_key=<span class="ss">"&lt;your-huggingface-token&gt;"</span>       <span class="sc"># hf_xxx from huggingface.co/settings/tokens</span>
+)
+
+<span class="sc"># Chat via Together AI backend</span>
+response = client.chat.completions.create(
+    model=<span class="ss">"Qwen/Qwen3.5-9B:together"</span>,
+    messages=[
+        {<span class="ss">"role"</span>: <span class="ss">"user"</span>, <span class="ss">"content"</span>: <span class="ss">"Hello!"</span>}
+    ],
+    max_tokens=<span class="sv">4096</span>,
+    extra_body={<span class="ss">"chat_template_kwargs"</span>: {<span class="ss">"enable_thinking"</span>: <span class="sk">False</span>}}
+)
+
+<span class="sk">print</span>(response.choices[<span class="sv">0</span>].message.content)
+
+<span class="sc"># Code via Novita AI backend</span>
+code_response = client.chat.completions.create(
+    model=<span class="ss">"Qwen/Qwen3-Coder-Next:novita"</span>,
+    messages=[
+        {<span class="ss">"role"</span>: <span class="ss">"user"</span>, <span class="ss">"content"</span>: <span class="ss">"Write a Dockerfile for a Python 3.12 app."</span>}
+    ]
+)
+
+<span class="sk">print</span>(code_response.choices[<span class="sv">0</span>].message.content)</pre>
+                        <pre class="llm-snippet" id="llm-ollama" style="display:none"><span class="sc"># Direct via Ollama (bypass LiteLLM, local models only)</span>
+<span class="sc"># Route: Client → Ollama (on VPS)</span>
+<span class="sc"># No API key needed. Free, sovereign, runs on CPU.</span>
+<span class="sc"># pip install openai</span>
+<span class="sk">from</span> openai <span class="sk">import</span> OpenAI
+
+<span class="sc"># Internal: http://ollama:11434/v1 (from Docker network)</span>
+<span class="sc"># External: not exposed — use LiteLLM proxy instead</span>
+client = OpenAI(
+    base_url=<span class="ss">"http://ollama:11434/v1"</span>,
+    api_key=<span class="ss">"ollama"</span>               <span class="sc"># any value works</span>
+)
+
+<span class="sc"># Available local models:</span>
+<span class="sc">#   qwen2.5:3b        — Chat (German/English, 4GB RAM)</span>
+<span class="sc">#   llama3.2:3b       — Chat (English-focused)</span>
+<span class="sc">#   nomic-embed-text  — Embeddings (768 dim)</span>
+
+response = client.chat.completions.create(
+    model=<span class="ss">"qwen2.5:3b"</span>,
+    messages=[
+        {<span class="ss">"role"</span>: <span class="ss">"user"</span>, <span class="ss">"content"</span>: <span class="ss">"Was ist Kubernetes?"</span>}
+    ]
+)
+
+<span class="sk">print</span>(response.choices[<span class="sv">0</span>].message.content)</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Qdrant -->
+            <div class="api-service">
+                <div class="api-service-header">
+                    <div class="api-service-logo">
+                        <img src="logos/qdrant.png" alt="Qdrant">
+                    </div>
+                    <div class="api-service-info">
+                        <div class="api-service-title">Qdrant</div>
+                        <div class="api-service-desc">Vector similarity search and storage REST API for collections, points, and search operations.</div>
+                    </div>
+                </div>
+                <div class="api-fields">
+                    <div class="api-field">
+                        <label>API Base (external):</label>
+                        <div class="api-field-row">
+                            <span class="api-field-val">https://qdrant.aymenmastouri.io</span>
+                            <button class="api-btn" onclick="copyVal(this,'https://qdrant.aymenmastouri.io')">Copy</button>
+                        </div>
+                    </div>
+                    <div class="api-field">
+                        <label>API Base (internal):</label>
+                        <div class="api-field-row">
+                            <span class="api-field-val">http://qdrant:6333</span>
+                            <button class="api-btn" onclick="copyVal(this,'http://qdrant:6333')">Copy</button>
+                        </div>
+                    </div>
+                    <div class="api-field">
+                        <label>API Key:</label>
+                        <div class="api-field-row">
+                            <span class="api-field-val" id="qdrant-key-display" data-secret="83426eaddbe463fe1536df3b88f1a8f926987c9d0974dcf1132693f4524cd2b7">••••••••••••••••</span>
+                            <button class="api-btn" onclick="toggleSecret('qdrant-key-display','qdrant-key-toggle')" id="qdrant-key-toggle">Show</button>
+                            <button class="api-btn" onclick="copySecret('qdrant-key-display',this)">Copy</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="api-snippets">
+                    <div class="snippets-label">Code Snippets</div>
+                    <div class="snippet-bar">
+                        <div class="snippet-tabs">
+                            <button class="stab active">Search</button>
+                        </div>
+                        <div class="snippet-tabs">
+                            <button class="stab active">Python</button>
+                        </div>
+                        <div class="snippet-actions">
+                            <button class="api-btn" onclick="downloadSnippet('qdrant-snippet','qdrant_search.py')">&#8595; .py</button>
+                            <button class="api-btn" onclick="copySnippet('qdrant-snippet',this)">Copy</button>
+                        </div>
+                    </div>
+                    <div class="snippet-block">
+                        <pre id="qdrant-snippet"><span class="sc"># Semantic Search — Embed query via LiteLLM, then search Qdrant</span>
+<span class="sc"># pip install openai requests</span>
+<span class="sk">from</span> openai <span class="sk">import</span> OpenAI
+<span class="sk">import</span> requests
+
+<span class="sc"># Step 1: Generate embedding</span>
+client = OpenAI(
+    base_url=<span class="ss">"https://llm.aymenmastouri.io/v1"</span>,
+    api_key=<span class="ss">"&lt;your-api-key&gt;"</span>
+)
+embed = client.embeddings.create(
+    model=<span class="ss">"nomic-embed-text"</span>,
+    input=[<span class="ss">"What is a vector database?"</span>]
+)
+query_vector = embed.data[<span class="sv">0</span>].embedding
+
+<span class="sc"># Step 2: Search Qdrant</span>
+response = requests.post(
+    url=<span class="ss">"https://qdrant.aymenmastouri.io/collections/repo_docs/points/search"</span>,
+    headers={<span class="ss">"api-key"</span>: <span class="ss">"&lt;your-qdrant-api-key&gt;"</span>},
+    json={<span class="ss">"vector"</span>: query_vector, <span class="ss">"limit"</span>: <span class="sv">5</span>, <span class="ss">"with_payload"</span>: <span class="sk">True</span>}
+)
+
+<span class="sk">for</span> r <span class="sk">in</span> response.json()[<span class="ss">"result"</span>]:
+    <span class="sk">print</span>(r[<span class="ss">"score"</span>], r[<span class="ss">"payload"</span>])</pre>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- end apiPanel -->
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-links">
+                <a href="https://aymenmastouri.io">Portfolio</a>
+                <a href="https://github.com/aymenmastouri">GitHub</a>
+                <a href="https://linkedin.com/in/aymen-mastouri-073b67171">LinkedIn</a>
+            </div>
+            <span>&copy; 2026 Aymen Mastouri</span>
+            <span class="footer-meta">OVH VPS &middot; Ubuntu 25.04 &middot; Docker + Traefik</span>
+        </div>
+    </footer>
+
+    <script>
+    (function() {
+        const html = document.documentElement;
+
+        // === Theme ===
+        function getPreferred() {
+            const saved = localStorage.getItem('theme');
+            if (saved) return saved;
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        function applyTheme(theme) {
+            html.classList.toggle('dark', theme === 'dark');
+        }
+
+        applyTheme(getPreferred());
+
+        window.toggleTheme = function() {
+            const next = html.classList.contains('dark') ? 'light' : 'dark';
+            localStorage.setItem('theme', next);
+            applyTheme(next);
+        };
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+            if (!localStorage.getItem('theme')) applyTheme(e.matches ? 'dark' : 'light');
+        });
+
+        // === Tabs ===
+        const tabs = document.querySelectorAll('.tab');
+        const cards = document.querySelectorAll('.card');
+        let activeTab = 'all';
+        let activeFilters = new Set();
+        let searchQuery = '';
+
+        const toolbar = document.querySelector('.toolbar');
+        const cardGrid = document.getElementById('cardGrid');
+        const apiPanel = document.getElementById('apiPanel');
+
+        function updatePanelVisibility() {
+            const isApi = activeTab === 'api';
+            toolbar.style.display = isApi ? 'none' : '';
+            cardGrid.style.display = isApi ? 'none' : '';
+            apiPanel.style.display = isApi ? 'flex' : 'none';
+        }
+
+        function filterCards() {
+            let visible = 0;
+            cards.forEach(function(card) {
+                const cat = card.dataset.category || '';
+                const tags = (card.dataset.tags || '').split(',').filter(Boolean);
+                const search = (card.dataset.search || '').toLowerCase();
+
+                let showTab = activeTab === 'all' || cat === activeTab;
+                let showFilter = activeFilters.size === 0 || tags.some(function(t) { return activeFilters.has(t); });
+                let showSearch = !searchQuery || search.includes(searchQuery);
+
+                const show = showTab && showFilter && showSearch;
+                card.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+
+            // No results message
+            let noRes = document.getElementById('noResults');
+            if (visible === 0) {
+                if (!noRes) {
+                    noRes = document.createElement('div');
+                    noRes.id = 'noResults';
+                    noRes.className = 'no-results';
+                    noRes.textContent = 'No results found. Try adjusting your filters.';
+                    document.getElementById('cardGrid').appendChild(noRes);
+                }
+                noRes.style.display = '';
+            } else if (noRes) {
+                noRes.style.display = 'none';
+            }
+        }
+
+        tabs.forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                tabs.forEach(function(t) { t.classList.remove('active'); });
+                tab.classList.add('active');
+                activeTab = tab.dataset.tab;
+                updatePanelVisibility();
+                if (activeTab !== 'api') filterCards();
+            });
+        });
+
+        // === API Panel helpers (exposed globally for onclick) ===
+        window.copyVal = function copyVal(btn, text) {
+            navigator.clipboard.writeText(text).then(function() {
+                var orig = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.classList.add('done');
+                setTimeout(function() { btn.textContent = orig; btn.classList.remove('done'); }, 1500);
+            });
+        }
+
+        window.toggleSecret = function toggleSecret(displayId, btnId) {
+            var el = document.getElementById(displayId);
+            var btn = document.getElementById(btnId);
+            if (btn.textContent === 'Show') {
+                el.textContent = el.dataset.secret;
+                btn.textContent = 'Hide';
+            } else {
+                el.textContent = '••••••••••••••••';
+                btn.textContent = 'Show';
+            }
+        }
+
+        window.copySecret = function copySecret(displayId, btn) {
+            var el = document.getElementById(displayId);
+            navigator.clipboard.writeText(el.dataset.secret).then(function() {
+                var orig = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.classList.add('done');
+                setTimeout(function() { btn.textContent = orig; btn.classList.remove('done'); }, 1500);
+            });
+        }
+
+        window.copySnippet = function copySnippet(preId, btn) {
+            var pre = document.getElementById(preId);
+            navigator.clipboard.writeText(pre.innerText).then(function() {
+                var orig = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.classList.add('done');
+                setTimeout(function() { btn.textContent = orig; btn.classList.remove('done'); }, 1500);
+            });
+        }
+
+        window.downloadSnippet = function downloadSnippet(preId, filename) {
+            var pre = document.getElementById(preId);
+            var blob = new Blob([pre.innerText], { type: 'text/plain' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        window.showSnippet = function showSnippet(btn, id) {
+            var group = btn.closest('.snippet-tabs');
+            group.querySelectorAll('.stab').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            var block = btn.closest('.snippet-block') || btn.closest('.api-snippets').querySelector('.snippet-block');
+            var prefix = id.split('-')[0];
+            block.querySelectorAll('pre.' + prefix + '-snippet').forEach(function(p) { p.style.display = 'none'; p.classList.remove('active'); });
+            var target = document.getElementById(id);
+            target.style.display = '';
+            target.classList.add('active');
+        }
+
+        window.copyActiveSnippet = function copyActiveSnippet(prefix, btn) {
+            var pre = document.querySelector('pre.' + prefix + '-snippet.active');
+            if (!pre) return;
+            navigator.clipboard.writeText(pre.innerText).then(function() {
+                var orig = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.classList.add('done');
+                setTimeout(function() { btn.textContent = orig; btn.classList.remove('done'); }, 1500);
+            });
+        }
+
+        window.downloadActiveSnippet = function downloadActiveSnippet(prefix) {
+            var pre = document.querySelector('pre.' + prefix + '-snippet.active');
+            if (!pre) return;
+            var names = { 'llm-chat': 'chat.py', 'llm-code': 'codegen.py', 'llm-think': 'thinking.py', 'llm-reason': 'reasoning.py', 'llm-embed': 'embeddings.py', 'llm-hf': 'huggingface_direct.py', 'llm-ollama': 'ollama_direct.py' };
+            var filename = names[pre.id] || pre.id + '.py';
+            var blob = new Blob([pre.innerText], { type: 'text/plain' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        // === Filter Tags ===
+        document.querySelectorAll('.filter-tag').forEach(function(tag) {
+            tag.addEventListener('click', function() {
+                const f = tag.dataset.filter;
+                if (activeFilters.has(f)) {
+                    activeFilters.delete(f);
+                    tag.classList.remove('active');
+                } else {
+                    activeFilters.add(f);
+                    tag.classList.add('active');
+                }
+                filterCards();
+            });
+        });
+
+        // === Search ===
+        document.getElementById('search').addEventListener('input', function(e) {
+            searchQuery = e.target.value.toLowerCase().trim();
+            filterCards();
+        });
+    })();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" rx="40" fill="#1a56db"/>
+  <text x="100" y="88" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="800" font-size="36" fill="white" letter-spacing="-1">Lite</text>
+  <text x="100" y="132" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="800" font-size="42" fill="white" letter-spacing="-2">LLM</text>
+  <rect x="40" y="52" width="120" height="3" rx="1.5" fill="#93c5fd" opacity="0.4"/>
+  <rect x="40" y="145" width="120" height="3" rx="1.5" fill="#93c5fd" opacity="0.4"/>
+</svg>
